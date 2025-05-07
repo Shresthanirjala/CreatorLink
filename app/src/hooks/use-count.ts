@@ -6,30 +6,33 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useTransactionToast } from "./use-transactiontoast";
 import { toast } from "sonner";
 import { useConnection } from "@solana/wallet-adapter-react";
-import { setProvider } from "@coral-xyz/anchor";
+import { Program, setProvider } from "@coral-xyz/anchor";
 import { useMemo } from "react";
+import { AnchorCounter } from "@/anchor/idlType";
+import idl from "@/anchor/idl.json";
 
-const programId = getCounterProgramId(ClusterNetwork.Devnet)
-const provider = useAnchorProvider()
-const program = getCounterProgram(provider)
-const cluster = useCluster()
+// const programId = getCounterProgramId(ClusterNetwork.Devnet)
+// const provider = useAnchorProvider()
+// const cluster = useCluster()
 
 export function useCounterProgram() {
   const { connection } = useConnection()
   const { cluster } = useCluster()
+
   const transactionToast = useTransactionToast()
   const provider = useAnchorProvider()
-  setProvider(provider)
-  console.log("cluster")
-  console.log("cluster", cluster)
   const programId = useMemo(() => getCounterProgramId("devnet"), [cluster])
-  console.log("provider")
-  console.log("provider", provider)
   const program = getCounterProgram(provider)
+
+    const program1 = new Program<AnchorCounter>(idl, provider);
+
+
+  setProvider(provider)
+  console.log("provider", provider)
 
   const accounts = useQuery({
     queryKey: ["counter", "all", { cluster }],
-    queryFn: () => program.account.counter.all(),
+    queryFn: () => program.account.counter.all()
   })
 
   const getProgramAccount = useQuery({
@@ -49,7 +52,7 @@ export function useCounterProgram() {
       transactionToast(signature)
       return accounts.refetch()
     },
-    onError: () => toast.error("Failed to initialize account"),
+    onError: (error) => toast.error(`Failed to initialize account ${error}`),
   })
 
   return {
@@ -62,7 +65,10 @@ export function useCounterProgram() {
 }
 
 export function useCounterProgramAccount({ account }: { account: PublicKey }) {
+  const provider = useAnchorProvider()
+  const program = getCounterProgram(provider)
   const transactionToast = useTransactionToast()
+
 
   const accountQuery = useQuery({
     queryKey: ["account", account.toBase58()],
@@ -100,8 +106,6 @@ export function useCounterProgramAccount({ account }: { account: PublicKey }) {
       return accountQuery.refetch()
     },
   })
-
- 
 
   return {
     incrementMutation,

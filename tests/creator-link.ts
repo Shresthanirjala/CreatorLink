@@ -1,12 +1,12 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
-import { CreatorLink } from "../target/types/creator_link";
+import { AnchorCounter } from "../target/types/anchor_counter";
 
 describe("creator-link", () => {
   // Configure the client to use the local cluster.
   anchor.setProvider(anchor.AnchorProvider.env());
 
-  const program = anchor.workspace.creatorLink as Program<CreatorLink>;
+  const program = anchor.workspace.creatorLink as Program<AnchorCounter>;
 
   it("Is initialized!", async () => {
     // Add your test here.

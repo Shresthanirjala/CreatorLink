@@ -110,9 +110,9 @@ const Navbar: React.FC = () => {
 
           {/* Hidden WalletMultiButton - used to trigger the wallet modal */}
           <div className="hidden">
-            <button ref={walletButtonRef}>
+            <Button ref={walletButtonRef}>
               <WalletMultiButton />
-            </button>
+            </Button>
           </div>
 
           {/* Custom wallet button with dropdown for connected state */}
