@@ -1,11 +1,21 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { Link } from "react-router-dom"
 import { Button } from "./ui/button"
-import { Wallet, Search, Bell, User, Menu, X } from "lucide-react"
+import { Wallet, Search, Bell, User, Menu, X, LogOut } from "lucide-react"
+import { useWallet } from "@solana/wallet-adapter-react"
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu"
 
 const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { publicKey, connected, disconnect } = useWallet()
+  const walletButtonRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -14,6 +24,22 @@ const Navbar: React.FC = () => {
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
+
+  // Function to trigger wallet modal
+  const handleWalletConnect = () => {
+    // Find the wallet-adapter button and click it programmatically
+    const walletAdapterButton = document.querySelector(
+      ".wallet-adapter-button-trigger"
+    ) as HTMLButtonElement
+    if (walletAdapterButton) {
+      walletAdapterButton.click()
+    }
+  }
+
+  const shortenAddress = (address: string | null) => {
+    if (!address) return ""
+    return `${address.slice(0, 4)}...${address.slice(-4)}`
+  }
 
   return (
     <nav
@@ -24,6 +50,7 @@ const Navbar: React.FC = () => {
       }`}
     >
       <div className="container flex items-center justify-between">
+        {/* Logo and site title */}
         <Link to="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold">
             C
@@ -33,6 +60,7 @@ const Navbar: React.FC = () => {
           </span>
         </Link>
 
+        {/* Desktop navigation links */}
         <div className="hidden md:flex items-center space-x-6">
           <Link
             to="/explore"
@@ -54,6 +82,7 @@ const Navbar: React.FC = () => {
           </Link>
         </div>
 
+        {/* Right side navigation items */}
         <div className="flex items-center gap-3">
           <Button
             variant="ghost"
@@ -78,10 +107,51 @@ const Navbar: React.FC = () => {
               <User className="h-5 w-5" />
             </Button>
           </Link>
-          <Button className="hidden md:flex bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:shadow-lg hover:shadow-blue-500/25 transition-all hover:scale-105">
-            <Wallet className="h-4 w-4 mr-2" /> Connect
-          </Button>
 
+          {/* Hidden WalletMultiButton - used to trigger the wallet modal */}
+          <div className="hidden">
+            <button ref={walletButtonRef}>
+              <WalletMultiButton />
+            </button>
+          </div>
+
+          {/* Custom wallet button with dropdown for connected state */}
+          {connected ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button className="hidden md:flex bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:shadow-lg hover:shadow-blue-500/25 transition-all hover:scale-105">
+                  <Wallet className="h-4 w-4 mr-2" />
+                  {shortenAddress(publicKey?.toString() || null)}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 bg-black/90 backdrop-blur-md border border-white/10 mt-2">
+                <DropdownMenuItem
+                  className="text-gray-300 hover:text-white focus:text-white cursor-pointer"
+                  onClick={handleWalletConnect}
+                >
+                  <Wallet className="h-4 w-4 mr-2" />
+                  Change Wallet
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="text-gray-300 hover:text-white focus:text-white cursor-pointer"
+                  onClick={() => disconnect()}
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Disconnect
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button
+              onClick={handleWalletConnect}
+              className="hidden md:flex bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 hover:shadow-lg hover:shadow-blue-500/25 transition-all hover:scale-105"
+            >
+              <Wallet className="h-4 w-4 mr-2" />
+              Connect
+            </Button>
+          )}
+
+          {/* Mobile menu toggle button */}
           <Button
             variant="ghost"
             size="icon"
@@ -122,9 +192,32 @@ const Navbar: React.FC = () => {
             >
               Blog
             </Link>
-            <Button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 mt-2">
-              <Wallet className="h-4 w-4 mr-2" /> Connect Wallet
-            </Button>
+
+            {/* Mobile wallet buttons */}
+            {connected ? (
+              <div className="flex flex-col gap-2 mt-2">
+                <Button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0">
+                  <Wallet className="h-4 w-4 mr-2" />
+                  {shortenAddress(publicKey?.toString() || null)}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="border-gray-700 text-gray-300"
+                  onClick={() => disconnect()}
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Disconnect
+                </Button>
+              </div>
+            ) : (
+              <Button
+                className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 mt-2"
+                onClick={handleWalletConnect}
+              >
+                <Wallet className="h-4 w-4 mr-2" />
+                Connect Wallet
+              </Button>
+            )}
           </div>
         </div>
       )}
