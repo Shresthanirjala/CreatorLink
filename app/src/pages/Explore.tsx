@@ -264,14 +264,14 @@ const CreatorGrid = () => {
   );
 };
 
-// Main Explore page component
+
 const Explore = () => {
   const [showMore, setShowMore] = useState(false);
   
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-gray-950 to-black text-white relative">
       <Navbar/>
-      {/* Animated background elements */}
+     
       <div className="fixed inset-0 z-0 overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full opacity-10 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-900 via-transparent to-transparent"></div>
         <div className="absolute top-1/3 right-1/4 w-64 h-64 bg-blue-500 rounded-full mix-blend-screen filter blur-3xl opacity-5 animate-pulse"></div>
