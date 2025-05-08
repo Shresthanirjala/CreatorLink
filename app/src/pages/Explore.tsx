@@ -133,12 +133,12 @@ const CreatorFilter = () => {
           className="w-full bg-transparent border-none outline-none p-3 text-gray-200 placeholder-gray-500"
         />
       </div>
-      
+
       <div className="flex gap-2">
-        <Button variant="secondary" className="gap-2">
+        <Button onClick={() => {}} variant="secondary" className="gap-2">
           <Filter className="h-4 w-4" /> Filters
         </Button>
-        
+
         <select className="bg-gray-800 text-gray-300 border border-gray-700 rounded-md py-2 px-3 outline-none appearance-none cursor-pointer">
           <option>All Categories</option>
           <option>Digital Art</option>
@@ -146,7 +146,7 @@ const CreatorFilter = () => {
           <option>Content Creation</option>
           <option>Photography</option>
         </select>
-        
+
         <select className="bg-gray-800 text-gray-300 border border-gray-700 rounded-md py-2 px-3 outline-none appearance-none cursor-pointer">
           <option>Price: Any</option>
           <option>Under 10 SOL</option>
@@ -155,7 +155,7 @@ const CreatorFilter = () => {
         </select>
       </div>
     </div>
-  );
+  )
 };
 
 // Creator Grid component
@@ -187,7 +187,7 @@ const CreatorGrid = () => {
             </button>
           ))}
         </div>
-        
+
         <select className="bg-gray-800 text-gray-300 border border-gray-700 rounded-md py-1.5 px-3 text-sm outline-none appearance-none cursor-pointer">
           <option>Sort: Default</option>
           <option>Price: Low to High</option>
@@ -195,7 +195,7 @@ const CreatorGrid = () => {
           <option>Popularity</option>
         </select>
       </div>
-      
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {mockCreators.map((creator) => (
           <div
@@ -207,12 +207,12 @@ const CreatorGrid = () => {
               <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-600/30 to-purple-600/30 backdrop-blur-md flex items-center justify-center text-gray-200 font-bold text-2xl border-2 border-gray-600/50 z-10">
                 {creator.initials}
               </div>
-              
+
               <div className="absolute bottom-3 right-3 px-2 py-0.5 bg-gray-900/70 backdrop-blur-sm rounded text-xs text-gray-300 flex items-center gap-1">
                 <User className="h-3 w-3" /> {creator.followers}
               </div>
             </div>
-            
+
             <div className="p-5">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center">
@@ -223,9 +223,7 @@ const CreatorGrid = () => {
                     <h3 className="font-medium text-gray-100">
                       {creator.name}
                     </h3>
-                    <p className="text-sm text-gray-400">
-                      {creator.category}
-                    </p>
+                    <p className="text-sm text-gray-400">{creator.category}</p>
                   </div>
                 </div>
                 <div
@@ -238,16 +236,17 @@ const CreatorGrid = () => {
                   {creator.change}
                 </div>
               </div>
-              
+
               <div className="pt-3 border-t border-gray-700">
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="text-xs text-gray-400">
-                      Token Price
+                    <p className="text-xs text-gray-400">Token Price</p>
+                    <p className="font-medium text-gray-100">
+                      {creator.price} SOL
                     </p>
-                    <p className="font-medium text-gray-100">{creator.price} SOL</p>
                   </div>
                   <Button
+                    onClick={() => {}}
                     variant="outline"
                     size="sm"
                     className="text-blue-400 border-blue-500/30 hover:bg-blue-500/10"
@@ -261,7 +260,7 @@ const CreatorGrid = () => {
         ))}
       </div>
     </div>
-  );
+  )
 };
 
 
