@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { useConnection } from "@solana/wallet-adapter-react";
 import { Program, setProvider } from "@coral-xyz/anchor";
 import { useMemo } from "react";
-import { AnchorCounter } from "@/anchor/idlType";
+import { CreatorLink } from "@/anchor/idlType";
 import idl from "@/anchor/idl.json";
 
 // const programId = getCounterProgramId(ClusterNetwork.Devnet)
@@ -24,16 +24,13 @@ export function useCounterProgram() {
   const programId = useMemo(() => getCounterProgramId("devnet"), [cluster])
   const program = getCounterProgram(provider)
 
-    const program1 = new Program<AnchorCounter>(idl, provider);
+    const program1 = new Program<CreatorLink>(idl, provider);
 
 
   setProvider(provider)
   console.log("provider", provider)
 
-  const accounts = useQuery({
-    queryKey: ["counter", "all", { cluster }],
-    queryFn: () => program.account.counter.all()
-  })
+
 
   const getProgramAccount = useQuery({
     queryKey: ["get-program-account", { cluster }],
@@ -77,18 +74,24 @@ export function useCounterProgramAccount({ account }: { account: PublicKey }) {
 
   const accountQuery = useQuery({
     queryKey: ["account", account.toBase58()],
-    queryFn: () => program.account.counter.fetch(account),
+    queryFn: () => program.account.creatorState.fetch(account),
   })
 
   const incrementMutation = useMutation({
     mutationKey: ["increment"],
     mutationFn: () =>
-      program.methods
-        .increment()
-        .accounts({
-          counter: account,
-        })
-        .rpc(),
+        program.methods.initializeCreator({
+            name:"test",
+            basePrice: 100,
+            slope: 5,
+            totalSupply: 1000,
+            link: "https://example.com",
+        }).accounts({
+          creatorState: account,
+          creator: provider.wallet.publicKey,
+          systemProgram: SystemProgram.programId,
+        }).rpc()
+      ,
 
     onSuccess: (tx) => {
       transactionToast(tx)
@@ -96,25 +99,9 @@ export function useCounterProgramAccount({ account }: { account: PublicKey }) {
     },
   })
 
-  const decrementMutation = useMutation({
-    mutationKey: ["decrement"],
-    mutationFn: () =>
-      program.methods
-        .decrement()
-        .accounts({
-          counter: account,
-        })
-        .rpc(),
-
-    onSuccess: (tx) => {
-      transactionToast(tx)
-      return accountQuery.refetch()
-    },
-  })
+ 
 
   return {
     incrementMutation,
-    decrementMutation,
-    accountQuery,
   }
 }
