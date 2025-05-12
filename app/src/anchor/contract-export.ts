@@ -1,13 +1,14 @@
 import { AnchorProvider, Program, type Idl } from '@coral-xyz/anchor';
 import { PublicKey, type Cluster } from '@solana/web3.js';
 import counterIdl from "./idl.json"
-import type { AnchorCounter } from './idlType';
+import type { CreatorLink } from './idlType';
+
 
 
 export const COUNTER_PROGRAM_ID = new PublicKey(counterIdl.address);
 
 export function getCounterProgram(provider: AnchorProvider) {
-  return new Program<AnchorCounter>(counterIdl , provider);
+  return new Program<CreatorLink>(counterIdl , provider);
 }
 
 export function getCounterProgramId(cluster: Cluster) {
