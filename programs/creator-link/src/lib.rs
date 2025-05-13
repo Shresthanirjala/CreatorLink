@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token_interface::{self, Mint, TokenAccount, TokenInterface};
 
-declare_id!("5xbQwuduFoaEQUKG7waf2oGiMvrPfZY5DFdLLMwtjtpb");
+declare_id!("5rpuD1rYDBoQJ7jzw9FdFEe7QFBipaMvT8k1T1p1D1ft ");
 
 #[program]
 pub mod creator_link {
@@ -54,7 +54,7 @@ pub mod creator_link {
 
 #[derive(Accounts)]
 pub struct InitializeCreator<'info> {
-    #[account(init, payer = creator, space = 8 + 32 * 2 + 8 * 4 + 4 + 220)]
+   #[account(init, payer = creator, space = 8 + 32 * 2 + 8 * 5 + 4 + 220)]
     pub creator_state: Account<'info, CreatorState>,
     #[account(mut)]
     pub creator: Signer<'info>,

@@ -27,7 +27,7 @@ const AppRoutes = () => {
               <Route path="/creator/:id" element={<CreatorProfile />} />
               <Route path="/portfolio" element={<Portfolio />} />
               <Route path="/become-creator" element={<CreatorOnboarding />} />
-              <Route path="/test" element={<Test />} />
+              {/* <Route path="/test" element={<Test />} /> */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

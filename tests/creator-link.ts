@@ -24,7 +24,7 @@ describe("creator-link", () => {
   // Airdrop check and balance validation for the wallet
  
   // Initialize the creator if needed (this part is skipped in the current test)
-  it.skip("initialize_creator", async () => {
+  it("initialize_creator", async () => {
     const tx = await program.methods
       .initializeCreator(
         mint.publicKey,

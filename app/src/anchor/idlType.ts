@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/creator_link.json`.
  */
 export type CreatorLink = {
-  "address": "5xbQwuduFoaEQUKG7waf2oGiMvrPfZY5DFdLLMwtjtpb",
+  "address": "5rpuD1rYDBoQJ7jzw9FdFEe7QFBipaMvT8k1T1p1D1ft",
   "metadata": {
     "name": "creatorLink",
     "version": "0.1.0",

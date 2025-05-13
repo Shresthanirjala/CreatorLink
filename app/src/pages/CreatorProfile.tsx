@@ -1,46 +1,62 @@
+import React from "react"
+import { useWallet } from "@solana/wallet-adapter-react"
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui"
+import { useCreatorProgram } from "@/hooks/use-creator"
+import { Keypair, PublicKey } from "@solana/web3.js"
 
-import React from "react";
-import { useParams } from "react-router-dom";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import ProfileHeader from "@/components/CreatorProfile/ProfileHeader";
-import TokenChart from "@/components/CreatorProfile/TokenChart";
-import ContentFeed from "@/components/CreatorProfile/ContentFeed";
+export default function CreatorProfile() {
+  const { connected } = useWallet()
+  const { accounts, initialize, getProgramAccount } = useCreatorProgram()
 
-const mockCreator = {
-  id: 1,
-  name: "Alex Rivera",
-  category: "Music Producer",
-  bio: "Electronic music producer creating ambient soundscapes and lo-fi beats. Based in Los Angeles, I've been producing music for over 5 years and have collaborated with artists worldwide.",
-  followers: 12500,
-  holders: 235
-};
+  const createCreatorProfile = async () => {
+    const creatorState = Keypair.generate()
+    const mint = new PublicKey("So11111111111111111111111111111111111111112") // example
+    const basePrice = 1000000
+    const slope = 10000
+    const totalSupply = 1000
+    const link = "https://example.com/creator"
 
-const CreatorProfile = () => {
-  const { id } = useParams<{ id: string }>();
-  
-  // In a real app, you would fetch creator data based on id
-  
+    await initialize.mutateAsync({
+      creatorState,
+      mint,
+      basePrice,
+      slope,
+      totalSupply,
+      link,
+    })
+  }
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <main className="flex-grow pt-16">
-        <ProfileHeader creator={mockCreator} />
-        
-        <div className="container py-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-1 order-2 lg:order-1">
-              <TokenChart />
-            </div>
-            <div className="lg:col-span-2 order-1 lg:order-2">
-              <ContentFeed />
-            </div>
-          </div>
-        </div>
-      </main>
-      <Footer />
-    </div>
-  );
-};
+    <div className="p-10">
+      <h1 className="text-3xl font-bold mb-6">Creator Profile</h1>
 
-export default CreatorProfile;
+      <WalletMultiButton className="mb-4" />
+
+      {!connected ? (
+        <p className="text-yellow-400">Connect wallet to manage your profile.</p>
+      ) : (
+        <>
+          <button
+            onClick={createCreatorProfile}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            disabled={initialize.isPending}
+          >
+            {initialize.isPending ? "Creating..." : "Create Creator Profile"}
+          </button>
+
+          <div className="mt-8">
+            {accounts.isLoading ? (
+              <p>Loading creator accounts...</p>
+            ) : (
+              accounts.data?.map((acc, i) => (
+                <div key={i} className="text-white bg-black/30 p-4 rounded-lg my-2">
+                  {acc.publicKey.toBase58()}
+                </div>
+              ))
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  )
+}

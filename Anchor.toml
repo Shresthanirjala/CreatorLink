@@ -6,7 +6,7 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-creator_link = "5xbQwuduFoaEQUKG7waf2oGiMvrPfZY5DFdLLMwtjtpb"
+creator_link = "5rpuD1rYDBoQJ7jzw9FdFEe7QFBipaMvT8k1T1p1D1ft "
 
 [registry]
 url = "https://api.apr.dev"
