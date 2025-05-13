@@ -10,6 +10,7 @@ import { Program, setProvider } from "@coral-xyz/anchor";
 import { useMemo } from "react";
 import { CreatorLink } from "@/anchor/idlType";
 import idl from "@/anchor/idl.json";
+import { program } from "@coral-xyz/anchor/dist/cjs/native/system";
 
 // const programId = getCounterProgramId(ClusterNetwork.Devnet)
 // const provider = useAnchorProvider()
@@ -77,31 +78,52 @@ export function useCounterProgramAccount({ account }: { account: PublicKey }) {
     queryFn: () => program.account.creatorState.fetch(account),
   })
 
-  const incrementMutation = useMutation({
-    mutationKey: ["increment"],
+//   const incrementMutation = useMutation({
+//     mutationKey: ["increment"],
+//     mutationFn: () =>
+//         program.methods.initializeCreator({
+//             name:"test",
+//             basePrice: 100,
+//             slope: 5,
+//             totalSupply: 1000,
+//             link: "https://example.com",
+//         }).accounts({
+//           creatorState: account,
+//           creator: provider.wallet.publicKey,
+//           systemProgram: SystemProgram.programId,
+//         }).rpc()
+//       ,
+
+//     onSuccess: (tx) => {
+//       transactionToast(tx)
+//       return accountQuery.refetch()
+//     },
+//   })
+
+ 
+    
+const incre = useMutation({
+    mutationKey: ["initalizecreator"],
     mutationFn: () =>
         program.methods.initializeCreator({
-            name:"test",
+            mint: new PublicKey(""),
             basePrice: 100,
             slope: 5,
             totalSupply: 1000,
             link: "https://example.com",
+
         }).accounts({
-          creatorState: account,
-          creator: provider.wallet.publicKey,
-          systemProgram: SystemProgram.programId,
+            creatorState: account,
+            creator: provider.wallet.publicKey,
+            // :"11111111111111111111111111111111"
+
         }).rpc()
-      ,
-
-    onSuccess: (tx) => {
-      transactionToast(tx)
-      return accountQuery.refetch()
-    },
-  })
-
- 
+})
 
   return {
-    incrementMutation,
+    // incrementMutation,
   }
 }
+
+
+
