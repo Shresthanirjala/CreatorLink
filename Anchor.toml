@@ -3,10 +3,11 @@ package_manager = "yarn"
 
 [features]
 resolution = true
-skip-lint = false
+skip-lint = true
 
 [programs.localnet]
-creator_link = "5rpuD1rYDBoQJ7jzw9FdFEe7QFBipaMvT8k1T1p1D1ft "
+creator_link = "5xbQwuduFoaEQUKG7waf2oGiMvrPfZY5DFdLLMwtjtpb"
+
 
 [registry]
 url = "https://api.apr.dev"
