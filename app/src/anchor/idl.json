@@ -1,5 +1,5 @@
 {
-  "address": "5rpuD1rYDBoQJ7jzw9FdFEe7QFBipaMvT8k1T1p1D1ft",
+  "address": "DTqpMgwBnw8jzBK3sH3ARBFHx4jD1JqgGqJVyymj1tqa",
   "metadata": {
     "name": "creator_link",
     "version": "0.1.0",
@@ -9,16 +9,7 @@
   "instructions": [
     {
       "name": "buy_t",
-      "discriminator": [
-        105,
-        64,
-        53,
-        239,
-        181,
-        56,
-        90,
-        172
-      ],
+      "discriminator": [105, 64, 53, 239, 181, 56, 90, 172],
       "accounts": [
         {
           "name": "buyer",
@@ -48,21 +39,8 @@
               {
                 "kind": "const",
                 "value": [
-                  118,
-                  97,
-                  117,
-                  108,
-                  116,
-                  95,
-                  97,
-                  117,
-                  116,
-                  104,
-                  111,
-                  114,
-                  105,
-                  116,
-                  121
+                  118, 97, 117, 108, 116, 95, 97, 117, 116, 104, 111, 114, 105,
+                  116, 121
                 ]
               },
               {
@@ -88,16 +66,7 @@
     },
     {
       "name": "initialize_creator",
-      "discriminator": [
-        29,
-        153,
-        44,
-        99,
-        52,
-        172,
-        81,
-        115
-      ],
+      "discriminator": [29, 153, 44, 99, 52, 172, 81, 115],
       "accounts": [
         {
           "name": "creator_state",
@@ -136,21 +105,46 @@
           "type": "string"
         }
       ]
+    },
+    {
+      "name": "withdraw",
+      "discriminator": [183, 18, 70, 156, 148, 109, 161, 34],
+      "accounts": [
+        {
+          "name": "creator",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "vault_account",
+          "writable": true
+        },
+        {
+          "name": "destination",
+          "writable": true
+        },
+        {
+          "name": "creator_state"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
     }
   ],
   "accounts": [
     {
       "name": "CreatorState",
-      "discriminator": [
-        37,
-        107,
-        190,
-        213,
-        241,
-        216,
-        73,
-        180
-      ]
+      "discriminator": [37, 107, 190, 213, 241, 216, 73, 180]
+    }
+  ],
+  "events": [
+    {
+      "name": "TokenPurchased",
+      "discriminator": [3, 73, 186, 50, 15, 181, 213, 37]
     }
   ],
   "errors": [
@@ -158,6 +152,11 @@
       "code": 6000,
       "name": "InsufficientFunds",
       "msg": "Buyer has insufficient SOL to purchase token."
+    },
+    {
+      "code": 6001,
+      "name": "Unauthorized",
+      "msg": "You are not authorized to perform this action."
     }
   ],
   "types": [
@@ -193,6 +192,26 @@
           {
             "name": "link",
             "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TokenPurchased",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "buyer",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "price_paid",
+            "type": "u64"
           }
         ]
       }

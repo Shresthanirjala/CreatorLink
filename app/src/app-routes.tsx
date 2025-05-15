@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom"
 import { lazy, Suspense } from "react"
 import NotFound from "./pages/NotFound"
 import Test from "./pages/test"
+import Itest from "./pages/Itest"
+import Tokencreate from "./pages/tokencreate"
 
 const Index = lazy(() => import("./pages/Index"))
 const Explore = lazy(() => import("./pages/Explore"))
@@ -27,6 +29,8 @@ const AppRoutes = () => {
               <Route path="/creator/:id" element={<CreatorProfile />} />
               <Route path="/portfolio" element={<Portfolio />} />
               <Route path="/become-creator" element={<CreatorOnboarding />} />
+              <Route path="/itest" element={<Itest />} />
+              <Route path="/create" element={<Tokencreate />} />
               {/* <Route path="/test" element={<Test />} /> */}
               <Route path="*" element={<NotFound />} />
             </Routes>

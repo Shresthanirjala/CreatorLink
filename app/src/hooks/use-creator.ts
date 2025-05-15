@@ -19,7 +19,10 @@ export function useCreatorProgram() {
   const provider = useAnchorProvider()
 
   const programId = useMemo(() => getCounterProgramId("devnet"), [cluster])
-  const program = useMemo(() => new Program<CreatorLink>(idl, provider), [provider])
+  // const program = useMemo(() => new Program<CreatorLink>(idl, provider), [provider])
+
+  const program = new Program<CreatorLink>(idl , provider);
+
 
   setProvider(provider)
 
@@ -51,6 +54,12 @@ export function useCreatorProgram() {
       link: string
     }) => {
       try {
+        console.log("creatr State ", creatorState.publicKey)
+        console.log("mint ", creatorState.publicKey)
+        console.log("bese price ",basePrice)
+        console.log("slope  ", slope)
+        console.log("total supply ",totalSupply)
+        console.log(" link ", link)
         const tx = await program.methods
           .initializeCreator(
             mint,
@@ -62,6 +71,8 @@ export function useCreatorProgram() {
           .accounts({
             creatorState: creatorState.publicKey,
             creator: provider.wallet.publicKey,
+
+            
           })
           .signers([creatorState])
           .rpc()
