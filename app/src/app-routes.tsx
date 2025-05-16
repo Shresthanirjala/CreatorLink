@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import { lazy, Suspense } from "react"
 import NotFound from "./pages/NotFound"
-import Test from "./pages/test"
+// import Test from "./pages/test"
 import Itest from "./pages/Itest"
 import Tokencreate from "./pages/tokencreate"
 

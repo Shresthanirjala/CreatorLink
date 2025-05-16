@@ -1,10 +1,13 @@
 import React, { useState } from "react"
 import { useAnchorProvider } from "@/components/Solana/solana-provider"
 import { Transaction, PublicKey } from "@solana/web3.js"
+import idl from "@/anchor/idl.json"
 import {
   getAssociatedTokenAddress,
   createAssociatedTokenAccountInstruction,
   createTransferInstruction,
+  getOrCreateAssociatedTokenAccount,
+  TOKEN_PROGRAM_ID,
 } from "@solana/spl-token"
 import { buytoken } from "@/utilis/buy"
 import {
@@ -61,6 +64,26 @@ const CreatorProfile = () => {
     const wallet = provider.wallet
 
     setIsLoading(true)
+    const mint = new PublicKey("2ZSNQk3mBa6Zhd7ddCpK7cexTgdtptsKc5KJ6VFhorzM")
+    const iaddress = new PublicKey(idl.address)
+
+    const [vaultAuthority] = PublicKey.findProgramAddressSync(
+      [Buffer.from("vault_authority"), wallet.publicKey.toBuffer()],
+      iaddress
+    )
+
+    const vaultTokenAccount = await getOrCreateAssociatedTokenAccount(
+      connection,
+      provider.wallet.payer,
+      mint,
+      vaultAuthority,
+      true, // allow off-curve PDA
+      undefined,
+      undefined,
+      TOKEN_PROGRAM_ID // 👈 make sure this matches the one used in Rust
+    )
+    console.log("valutoken account", vaultTokenAccount)
+
     try {
       // Call our buytoken utility function with the mint address and amount
       const txSignature = await buytoken(buyAmount, connection, wallet)
