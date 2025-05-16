@@ -12,7 +12,8 @@ import {
 import { useWallet } from "@solana/wallet-adapter-react"
 
 
-const PlatformAddress =  "9X7MA8QsmtgsHU3WK4bjgjJtNEsWRrmuDTYncEBmPBCM"
+const PlatformAddress = "9X7MA8QsmtgsHU3WK4bjgjJtNEsWRrmuDTYncEBmPBCM"
+const creatorInitializakey = "21BX94Cv7w5aPkCe8wm9vUu49zEcT7JPgepxbkEKijRr"
 
 const buytoken = async (
   amount: number,

@@ -151,7 +151,7 @@ const TokenCreate = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-black p-4">
-   <div className="max-w-2xl w-full mx-auto bg-black">
+      <div className="max-w-2xl w-full mx-auto bg-black">
         <div className="bg-gray-900 rounded-2xl p-8 border border-gray-800 shadow-xl">
           <h2 className="text-3xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">
             Launch Your Creator Token
@@ -161,7 +161,9 @@ const TokenCreate = () => {
             <>
               <div className="mb-8">
                 <div className="p-6 rounded-xl bg-gray-800 border border-gray-700 mb-6">
-                  <h3 className="text-lg font-medium mb-4">Token Details</h3>
+                  <h3 className="text-lg font-medium mb-4 text-white">
+                    Token Details
+                  </h3>
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
@@ -196,9 +198,9 @@ const TokenCreate = () => {
                         defaultValue="1,000,000"
                         onChange={(e) => {
                           // Remove commas and convert to number
-                          const value = e.target.value.replace(/,/g, '');
+                          const value = e.target.value.replace(/,/g, "")
                           if (!isNaN(Number(value))) {
-                            setTokenSupply(Number(value));
+                            setTokenSupply(Number(value))
                           }
                         }}
                       />
@@ -207,7 +209,7 @@ const TokenCreate = () => {
                 </div>
 
                 <div className="p-6 rounded-xl bg-gray-800 border border-gray-700">
-                  <h3 className="text-lg font-medium mb-4">
+                  <h3 className="text-lg font-medium mb-4 text-white">
                     Token Distribution
                   </h3>
                   <div className="space-y-3">
@@ -263,11 +265,11 @@ const TokenCreate = () => {
                 </button>
 
                 <button
-                                  onClick={() => {
-                                      setShouldCreateToken(true) 
-                                      
-                                        createToken()
-                                  }}
+                  onClick={() => {
+                    setShouldCreateToken(true)
+
+                    createToken()
+                  }}
                   disabled={loading}
                   className={`flex items-center px-8 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white font-medium ${
                     loading ? "opacity-50 cursor-not-allowed" : ""
@@ -301,7 +303,7 @@ const TokenCreate = () => {
                     <span className="text-gray-400 text-sm">
                       Initial Supply:
                     </span>
-                      <h4 className="text-white font-medium">{ tokenSupply}</h4>
+                    <h4 className="text-white font-medium">{tokenSupply}</h4>
                   </div>
                 </div>
 
