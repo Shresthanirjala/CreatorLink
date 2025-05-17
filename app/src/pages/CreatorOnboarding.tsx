@@ -1,7 +1,16 @@
-import React, { useState } from "react";
-import { ChevronRight, ChevronLeft, Wallet, User, Upload, Zap, Check, CheckIcon } from "lucide-react";
-import Navbar from "@/components/Navbar";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useRef } from "react"
+import {
+  ChevronRight,
+  ChevronLeft,
+  Wallet,
+  User,
+  Upload,
+  Zap,
+  Check,
+  CheckIcon,
+} from "lucide-react"
+import Navbar from "@/components/Navbar"
+import { useNavigate } from "react-router-dom"
 
 const CreatorOnboarding = () => {
   const [currentStep, setCurrentStep] = useState(1)
@@ -167,7 +176,7 @@ const WalletConnectStep = ({ onNext }) => {
                 <span className="text-2xl mr-3">{wallet.icon}</span>
                 <span>{wallet.name}</span>
               </div>
-              {connected && wallet.name === "MetaMask" ? (
+              {connected && wallet.name === "Phantom" ? (
                 <span className="bg-gradient-to-r from-purple-500 to-cyan-500 text-white text-xs px-2 py-1 rounded-full">
                   Connected
                 </span>
@@ -314,7 +323,7 @@ const ProfileSetupStep = ({ onNext, onBack }) => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-400 mb-1">
-                  Instagram
+                  Youtube Url
                 </label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
@@ -360,33 +369,136 @@ const ProfileSetupStep = ({ onNext, onBack }) => {
 
 // Step 3: Content Upload
 const ContentUploadStep = ({ onNext, onBack }) => {
+  const [selectedFiles, setSelectedFiles] = useState([])
+  const fileInputRef = useRef(null)
+
+  const handleFileInputClick = () => {
+    fileInputRef.current.click()
+  }
+
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files)
+    setSelectedFiles(files)
+    console.log("Files selected:", files)
+  }
+
+  const handleDragOver = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+  const handleDrop = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    const files = Array.from(e.dataTransfer.files)
+    setSelectedFiles(files)
+    console.log("Files dropped:", files)
+  }
+
   return (
     <div className="max-w-2xl mx-auto">
       <div className="bg-gray-900 rounded-2xl p-8 border border-gray-800 shadow-xl">
         <h2 className="text-3xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">
           Upload Your Content
         </h2>
-        
+
         <div className="mb-8">
-          <div className="border-2 border-dashed border-gray-700 rounded-xl p-8 text-center hover:border-cyan-500 transition-colors cursor-pointer">
-            <Upload className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-            <h3 className="text-lg font-medium mb-2">Drag and drop files here</h3>
-            <p className="text-gray-400 mb-4">Or click to browse your files</p>
-            <p className="text-gray-500 text-sm">
-              Supported formats: JPG, PNG, GIF, MP4, MP3 (Max 100MB)
-            </p>
-            
-            <button className="mt-6 px-6 py-2 bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 rounded-lg text-white font-medium">
-              Choose Files
-            </button>
+          <div
+            className={`border-2 border-dashed ${
+              selectedFiles.length > 0 ? "border-cyan-500" : "border-gray-700"
+            } rounded-xl p-8 text-center hover:border-cyan-500 transition-colors cursor-pointer`}
+            onClick={handleFileInputClick}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              onChange={handleFileChange}
+              multiple
+              accept=".jpg,.jpeg,.png,.gif,.mp4,.mp3"
+              className="hidden"
+            />
+
+            {selectedFiles.length === 0 ? (
+              <>
+                <Upload className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                <h3 className="text-lg font-medium mb-2">
+                  Drag and drop files here
+                </h3>
+                <p className="text-gray-400 mb-4">
+                  Or click to browse your files
+                </p>
+                <p className="text-gray-500 text-sm">
+                  Supported formats: JPG, PNG, GIF, MP4, MP3 (Max 100MB)
+                </p>
+
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    fileInputRef.current.click()
+                  }}
+                  className="mt-6 px-6 py-2 bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 rounded-lg text-white font-medium"
+                >
+                  Choose Files
+                </button>
+              </>
+            ) : (
+              <div className="py-4">
+                <div className="flex items-center justify-center mb-4">
+                  <div className="bg-cyan-500 rounded-full p-2">
+                    <Check className="h-6 w-6 text-white" />
+                  </div>
+                </div>
+                <h3 className="text-lg font-medium mb-2">Files Selected</h3>
+                <ul className="max-h-40 overflow-y-auto mb-4 px-4">
+                  {selectedFiles.map((file, index) => (
+                    <li
+                      key={index}
+                      className="flex items-center justify-between py-2 border-b border-gray-700 last:border-0"
+                    >
+                      <div className="flex items-center">
+                        <div className="w-8 h-8 bg-gray-700 rounded flex items-center justify-center mr-3">
+                          {file.type.startsWith("image/")
+                            ? "🖼️"
+                            : file.type.startsWith("video/")
+                            ? "🎬"
+                            : file.type.startsWith("audio/")
+                            ? "🎵"
+                            : "📄"}
+                        </div>
+                        <span className="text-sm text-gray-300 truncate max-w-xs">
+                          {file.name}
+                        </span>
+                      </div>
+                      <span className="text-xs text-gray-400">
+                        {(file.size / (1024 * 1024)).toFixed(2)} MB
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    fileInputRef.current.click()
+                  }}
+                  className="px-6 py-2 bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 rounded-lg text-white font-medium"
+                >
+                  Choose Different Files
+                </button>
+              </div>
+            )}
           </div>
         </div>
-        
+
         <div className="mb-8">
           <h3 className="text-lg font-medium mb-4">Content Details</h3>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-1">Title</label>
+              <label className="block text-sm font-medium text-gray-400 mb-1">
+                Title
+              </label>
               <input
                 type="text"
                 className="w-full bg-gray-800 border border-gray-700 rounded-lg py-2 px-4 text-white placeholder-gray-500 focus:ring-cyan-500 focus:border-cyan-500"
@@ -394,7 +506,9 @@ const ContentUploadStep = ({ onNext, onBack }) => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-1">Description</label>
+              <label className="block text-sm font-medium text-gray-400 mb-1">
+                Description
+              </label>
               <textarea
                 rows={3}
                 className="w-full bg-gray-800 border border-gray-700 rounded-lg py-2 px-4 text-white placeholder-gray-500 focus:ring-cyan-500 focus:border-cyan-500"
@@ -402,7 +516,9 @@ const ContentUploadStep = ({ onNext, onBack }) => {
               ></textarea>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-400 mb-1">Tags</label>
+              <label className="block text-sm font-medium text-gray-400 mb-1">
+                Tags
+              </label>
               <input
                 type="text"
                 className="w-full bg-gray-800 border border-gray-700 rounded-lg py-2 px-4 text-white placeholder-gray-500 focus:ring-cyan-500 focus:border-cyan-500"
@@ -411,16 +527,19 @@ const ContentUploadStep = ({ onNext, onBack }) => {
             </div>
           </div>
         </div>
-        
+
         <div className="p-4 rounded-lg bg-gradient-to-r from-purple-900/30 to-cyan-900/30 border border-gray-700 mb-8">
           <div className="flex items-start">
             <div className="mr-4 mt-1">
               <Zap className="h-6 w-6 text-cyan-400" />
             </div>
             <div>
-              <h4 className="font-medium text-white mb-1">Monetize your content through your own token</h4>
+              <h4 className="font-medium text-white mb-1">
+                Monetize your content through your own token
+              </h4>
               <p className="text-sm text-gray-300">
-                After completing your profile setup, you'll launch your creator token so fans can invest in your success.
+                After completing your profile setup, you'll launch your creator
+                token so fans can invest in your success.
               </p>
             </div>
           </div>
@@ -434,7 +553,7 @@ const ContentUploadStep = ({ onNext, onBack }) => {
             <ChevronLeft className="h-5 w-5 mr-2" />
             Back
           </button>
-          
+
           <button
             onClick={onNext}
             className="flex items-center px-8 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white font-medium"
@@ -445,24 +564,24 @@ const ContentUploadStep = ({ onNext, onBack }) => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
 // Step 4: Finalize Profile
 const FinalizeProfileStep = ({ onBack }) => {
-  const [profileComplete, setProfileComplete] = useState(false);
-  const [redirectToCreate, setRedirectToCreate] = useState(false);
-  const navigate = useNavigate();
-  
+  const [profileComplete, setProfileComplete] = useState(false)
+  const [redirectToCreate, setRedirectToCreate] = useState(false)
+  const navigate = useNavigate()
+
   const handleFinalize = () => {
-    setProfileComplete(true);
-  };
+    setProfileComplete(true)
+  }
 
   const handleCreateToken = () => {
     // Navigate to token creation page
-    navigate("/create");
-    console.log("Navigating to token creation page");
-  };
+    navigate("/create")
+    console.log("Navigating to token creation page")
+  }
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -470,7 +589,7 @@ const FinalizeProfileStep = ({ onBack }) => {
         <h2 className="text-3xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">
           Complete Your Creator Profile
         </h2>
-        
+
         {!profileComplete ? (
           <>
             <div className="mb-8">
@@ -479,11 +598,13 @@ const FinalizeProfileStep = ({ onBack }) => {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-gray-400">Creator name:</span>
-                    <span className="text-white font-medium">Alex Thompson</span>
+                    <span className="text-white font-medium">
+                      Akanshya thapa
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-gray-400">Username:</span>
-                    <span className="text-white font-medium">@alexcreates</span>
+                    <span className="text-white font-medium">@akanshya</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-gray-400">Content uploads:</span>
@@ -491,7 +612,7 @@ const FinalizeProfileStep = ({ onBack }) => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="p-6 rounded-xl bg-gray-800 border border-gray-700">
                 <h3 className="text-lg font-medium mb-4">Creator Benefits</h3>
                 <ul className="space-y-3">
@@ -499,30 +620,38 @@ const FinalizeProfileStep = ({ onBack }) => {
                     <div className="bg-gradient-to-r from-purple-500 to-cyan-500 rounded-full p-1 mr-3 mt-1">
                       <Check className="h-4 w-4 text-white" />
                     </div>
-                    <span className="text-gray-300">Launch your own creator token on Solana</span>
+                    <span className="text-gray-300">
+                      Launch your own creator token on Solana
+                    </span>
                   </li>
                   <li className="flex items-start">
                     <div className="bg-gradient-to-r from-purple-500 to-cyan-500 rounded-full p-1 mr-3 mt-1">
                       <Check className="h-4 w-4 text-white" />
                     </div>
-                    <span className="text-gray-300">Attract investment from fans who believe in your content</span>
+                    <span className="text-gray-300">
+                      Attract investment from fans who believe in your content
+                    </span>
                   </li>
                   <li className="flex items-start">
                     <div className="bg-gradient-to-r from-purple-500 to-cyan-500 rounded-full p-1 mr-3 mt-1">
                       <Check className="h-4 w-4 text-white" />
                     </div>
-                    <span className="text-gray-300">Grow your community through token-based incentives</span>
+                    <span className="text-gray-300">
+                      Grow your community through token-based incentives
+                    </span>
                   </li>
                   <li className="flex items-start">
                     <div className="bg-gradient-to-r from-purple-500 to-cyan-500 rounded-full p-1 mr-3 mt-1">
                       <Check className="h-4 w-4 text-white" />
                     </div>
-                    <span className="text-gray-300">Enable subscribers to invest directly in your success</span>
+                    <span className="text-gray-300">
+                      Enable subscribers to invest directly in your success
+                    </span>
                   </li>
                 </ul>
               </div>
             </div>
-            
+
             <div className="mt-8 flex justify-between">
               <button
                 onClick={onBack}
@@ -531,7 +660,7 @@ const FinalizeProfileStep = ({ onBack }) => {
                 <ChevronLeft className="h-5 w-5 mr-2" />
                 Back
               </button>
-              
+
               <button
                 onClick={handleFinalize}
                 className="flex items-center px-8 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white font-medium"
@@ -546,26 +675,30 @@ const FinalizeProfileStep = ({ onBack }) => {
             <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-r from-purple-500 to-cyan-500 mb-6">
               <Check className="h-12 w-12 text-white" />
             </div>
-            
+
             <h3 className="text-2xl font-bold mb-4">Congratulations!</h3>
             <p className="text-gray-400 mb-8">
               Your creator profile has been successfully set up.
-              <br />You're now ready to launch your token and attract investors!
+              <br />
+              You're now ready to launch your token and attract investors!
             </p>
-            
+
             <div className="p-6 rounded-xl bg-gradient-to-r from-purple-900/40 to-cyan-900/40 border border-gray-700 mb-8">
               <div className="flex items-center justify-center mb-4">
                 <div className="bg-gray-800 p-3 rounded-lg">
                   <Zap className="h-8 w-8 text-cyan-400" />
                 </div>
               </div>
-              
-              <h4 className="text-lg font-medium mb-2 text-center">Ready to launch your Creator Token?</h4>
+
+              <h4 className="text-lg font-medium mb-2 text-center">
+                Ready to launch your Creator Token?
+              </h4>
               <p className="text-gray-400 text-center mb-4">
-                Create your own token on Solana and let fans invest in your growth story.
+                Create your own token on Solana and let fans invest in your
+                growth story.
               </p>
-              
-              <button 
+
+              <button
                 onClick={handleCreateToken}
                 className="w-full py-3 rounded-lg bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white font-medium flex items-center justify-center"
               >
@@ -573,17 +706,15 @@ const FinalizeProfileStep = ({ onBack }) => {
                 <Zap className="h-5 w-5 ml-2" />
               </button>
             </div>
-            
-            <button 
-              className="px-8 py-3 rounded-lg border border-gray-600 hover:border-gray-500 text-gray-300 hover:text-white font-medium transition-colors"
-            >
+
+            <button className="px-8 py-3 rounded-lg border border-gray-600 hover:border-gray-500 text-gray-300 hover:text-white font-medium transition-colors">
               Go to Creator Dashboard
             </button>
           </div>
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default CreatorOnboarding;
+export default CreatorOnboarding
