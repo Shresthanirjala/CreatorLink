@@ -1,19 +1,35 @@
 import { useState } from "react";
 import { ChevronDown, Stars, Filter, Search, TrendingUp, Zap, Clock, User } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import { useNavigate } from "react-router-dom"; // Import React Router's navigate hook
 
-// Mock data for creators
-const mockCreators = [
+// Mock data for creators - exported to be used in other components
+export const mockCreators = [
   {
     id: 1,
-    name: "Jessica Chen",
+    name: "Alex Thompson",
     initials: "JC",
     category: "Digital Artist",
     price: "12.45",
     change: "+24.5%",
     positive: true,
     followers: "12.5K",
-    popularity: 85
+    popularity: 85,
+    bio: "Digital artist exploring the boundaries between reality and imagination. Creating vibrant worlds through pixels and passion.",
+    coverImage: "https://images.unsplash.com/photo-1579547945413-497e1b99dac0?q=80&w=3270&auto=format&fit=crop",
+    token: {
+      name: "JESS",
+      symbol: "JCT",
+      price: 0.05,
+      holders: 428,
+      marketCap: 18500,
+      supply: 5
+    },
+    socials: {
+      twitter: "https://twitter.com/jesscreates",
+      instagram: "https://instagram.com/jesscreates",
+      youtube: "https://youtube.com/jesscreates"
+    }
   },
   {
     id: 2,
@@ -24,7 +40,22 @@ const mockCreators = [
     change: "-3.1%",
     positive: false,
     followers: "8.2K",
-    popularity: 72
+    popularity: 72,
+    bio: "Music producer specializing in electronic and ambient soundscapes. Creating audio experiences that transport listeners to new dimensions.",
+    coverImage: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?q=80&w=3270&auto=format&fit=crop",
+    token: {
+      name: "MARK",
+      symbol: "MWT",
+      price: 0.03,
+      holders: 218,
+      marketCap: 9200,
+      supply: 10
+    },
+    socials: {
+      twitter: "https://twitter.com/markwbeats",
+      instagram: "https://instagram.com/markwbeats",
+      youtube: "https://youtube.com/markwilsonmusic"
+    }
   },
   {
     id: 3,
@@ -35,7 +66,22 @@ const mockCreators = [
     change: "+42.3%",
     positive: true,
     followers: "56.8K",
-    popularity: 94
+    popularity: 94,
+    bio: "Content creator focused on tech education and digital lifestyle. Sharing knowledge and building a community of forward-thinking creators.",
+    coverImage: "https://images.unsplash.com/photo-1554189097-ffe88e998a2b?q=80&w=3270&auto=format&fit=crop",
+    token: {
+      name: "SOPH",
+      symbol: "SRT",
+      price: 0.09,
+      holders: 892,
+      marketCap: 48600,
+      supply: 8
+    },
+    socials: {
+      twitter: "https://twitter.com/sophrodtech",
+      instagram: "https://instagram.com/sophrodtech",
+      youtube: "https://youtube.com/sophiarodriguez"
+    }
   },
   {
     id: 4,
@@ -46,7 +92,22 @@ const mockCreators = [
     change: "+12.8%",
     positive: true,
     followers: "6.3K",
-    popularity: 68
+    popularity: 68,
+    bio: "Photographer capturing urban landscapes and street scenes. Finding beauty in the geometry and rhythm of city life.",
+    coverImage: "https://images.unsplash.com/photo-1604868189265-219ba7440d43?q=80&w=3270&auto=format&fit=crop",
+    token: {
+      name: "AIDEN",
+      symbol: "APT",
+      price: 0.02,
+      holders: 125,
+      marketCap: 3800,
+      supply: 20
+    },
+    socials: {
+      twitter: "https://twitter.com/aidenparklens",
+      instagram: "https://instagram.com/aidenparklens",
+      youtube: "https://youtube.com/aidenparkphotography"
+    }
   },
   {
     id: 5,
@@ -57,7 +118,22 @@ const mockCreators = [
     change: "-5.4%",
     positive: false,
     followers: "24.1K",
-    popularity: 81
+    popularity: 81,
+    bio: "Fashion designer merging traditional techniques with futuristic concepts. Creating wearable art that challenges conventions.",
+    coverImage: "https://images.unsplash.com/photo-1601924994987-69e26d50dc26?q=80&w=3270&auto=format&fit=crop",
+    token: {
+      name: "EMMA",
+      symbol: "ETT",
+      price: 0.07,
+      holders: 367,
+      marketCap: 25400,
+      supply: 12
+    },
+    socials: {
+      twitter: "https://twitter.com/emmathompsondesigns",
+      instagram: "https://instagram.com/emmathompsondesigns",
+      youtube: "https://youtube.com/emmathompson"
+    }
   },
   {
     id: 6,
@@ -68,7 +144,22 @@ const mockCreators = [
     change: "+18.7%",
     positive: true,
     followers: "15.9K",
-    popularity: 77
+    popularity: 77,
+    bio: "Podcaster exploring the intersection of technology, culture, and creativity. Hosting thought-provoking conversations with industry leaders.",
+    coverImage: "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?q=80&w=3270&auto=format&fit=crop",
+    token: {
+      name: "TYLER",
+      symbol: "TJT",
+      price: 0.04,
+      holders: 231,
+      marketCap: 12800,
+      supply: 15
+    },
+    socials: {
+      twitter: "https://twitter.com/tylerjpodcast",
+      instagram: "https://instagram.com/tylerjpodcast",
+      youtube: "https://youtube.com/tylerjohnson"
+    }
   },
   {
     id: 7,
@@ -79,7 +170,22 @@ const mockCreators = [
     change: "+67.2%",
     positive: true,
     followers: "42.7K",
-    popularity: 92
+    popularity: 92,
+    bio: "3D animator pushing the boundaries of digital storytelling. Creating immersive worlds and characters that resonate with audiences worldwide.",
+    coverImage: "https://images.unsplash.com/photo-1626544827763-d516dce335e2?q=80&w=3270&auto=format&fit=crop",
+    token: {
+      name: "MAYA",
+      symbol: "MPT",
+      price: 0.12,
+      holders: 645,
+      marketCap: 72300,
+      supply: 7
+    },
+    socials: {
+      twitter: "https://twitter.com/mayapatel3d",
+      instagram: "https://instagram.com/mayapatel3d",
+      youtube: "https://youtube.com/mayapatel"
+    }
   },
   {
     id: 8,
@@ -90,7 +196,22 @@ const mockCreators = [
     change: "-1.8%",
     positive: false,
     followers: "19.3K",
-    popularity: 79
+    popularity: 79,
+    bio: "Game developer crafting interactive experiences that blend artistic expression with innovative gameplay mechanics.",
+    coverImage: "https://images.unsplash.com/photo-1605899435973-ca2d1a8861cf?q=80&w=3270&auto=format&fit=crop",
+    token: {
+      name: "LUCAS",
+      symbol: "LCT",
+      price: 0.06,
+      holders: 289,
+      marketCap: 18400,
+      supply: 9
+    },
+    socials: {
+      twitter: "https://twitter.com/lucascroftgames",
+      instagram: "https://instagram.com/lucascroftgames",
+      youtube: "https://youtube.com/lucascroft"
+    }
   }
 ];
 
@@ -160,6 +281,7 @@ const CreatorFilter = () => {
 
 // Creator Grid component
 const CreatorGrid = () => {
+  const navigate = useNavigate(); // Initialize navigate hook
   const [selectedTab, setSelectedTab] = useState("trending");
   
   const filterTabs = [
@@ -168,6 +290,11 @@ const CreatorGrid = () => {
     { id: "newest", label: "Newest", icon: <Clock className="h-4 w-4" /> },
     { id: "following", label: "Following", icon: <User className="h-4 w-4" /> }
   ];
+  
+  // Function to handle navigation to creator profile
+  const navigateToCreator = (creatorId) => {
+    navigate(`/creator/${creatorId}`);
+  };
   
   return (
     <div>
@@ -246,7 +373,7 @@ const CreatorGrid = () => {
                     </p>
                   </div>
                   <Button
-                    onClick={() => {}}
+                    onClick={() => navigateToCreator(creator.id)}
                     variant="outline"
                     size="sm"
                     className="text-blue-400 border-blue-500/30 hover:bg-blue-500/10"

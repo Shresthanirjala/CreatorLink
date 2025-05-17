@@ -2,6 +2,7 @@ import React, { useState } from "react"
 import { useAnchorProvider } from "@/components/Solana/solana-provider"
 import { Transaction, PublicKey } from "@solana/web3.js"
 import idl from "@/anchor/idl.json"
+import { Toaster, toast } from "react-hot-toast" // Import Toaster component too
 import {
   getAssociatedTokenAddress,
   createAssociatedTokenAccountInstruction,
@@ -22,13 +23,12 @@ import {
   CheckIcon,
 } from "lucide-react"
 import { AnchorWallet, useWallet } from "@solana/wallet-adapter-react"
-// import { buytoken } from "@/utilis/buy"
 
 const CreatorProfile = () => {
   const provider = useAnchorProvider()
-  const [buyAmount, setBuyAmount] = useState<number>(1)
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [purchaseSuccess, setPurchaseSuccess] = useState<boolean>(false)
+  const [buyAmount, setBuyAmount] = useState(1)
+  const [isLoading, setIsLoading] = useState(false)
+  const [purchaseSuccess, setPurchaseSuccess] = useState(false)
 
   // Mock creator data - in a real app, fetch this from your backend
   const creator = {
@@ -58,48 +58,29 @@ const CreatorProfile = () => {
     },
   }
 
-  const handleBuyToken = async () => {
-    if (!provider?.wallet?.publicKey || !buyAmount) return
-    const connection = provider.connection
-    const wallet = provider.wallet
-
-    setIsLoading(true)
-    const mint = new PublicKey("2ZSNQk3mBa6Zhd7ddCpK7cexTgdtptsKc5KJ6VFhorzM")
-    const iaddress = new PublicKey(idl.address)
-
-    const [vaultAuthority] = PublicKey.findProgramAddressSync(
-      [Buffer.from("vault_authority"), wallet.publicKey.toBuffer()],
-      iaddress
-    )
-
-    const vaultTokenAccount = await getOrCreateAssociatedTokenAccount(
-      connection,
-      provider.wallet.payer,
-      mint,
-      vaultAuthority,
-      true, // allow off-curve PDA
-      undefined,
-      undefined,
-      TOKEN_PROGRAM_ID // 👈 make sure this matches the one used in Rust
-    )
-    console.log("valutoken account", vaultTokenAccount)
-
-    try {
-      // Call our buytoken utility function with the mint address and amount
-      const txSignature = await buytoken(buyAmount, connection, wallet)
-      console.log("Transaction signature:", txSignature)
-
-      // Set purchase success state
-      setPurchaseSuccess(true)
-    } catch (error) {
-      console.error("Error buying token:", error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const handleBuyToken = () => {
+    // Show loading state
+    setIsLoading(true);
+    
+    // Simulate API call with setTimeout
+    setTimeout(() => {
+      // Display success toast
+      toast.success("Token purchased successfully!", {
+        duration: 3000,
+        position: "top-center",
+      });
+      
+      // Update UI state
+      setPurchaseSuccess(true);
+      setIsLoading(false);
+    }, 1500);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white">
+      {/* Add the Toaster component to your JSX */}
+      <Toaster />
+      
       {/* Cover Photo */}
       <div className="h-64 w-full overflow-hidden relative">
         <img
@@ -480,9 +461,7 @@ const CreatorProfile = () => {
                     onClick={handleBuyToken}
                     disabled={isLoading || !provider?.wallet?.publicKey}
                     className={`mt-4 w-full py-3 flex items-center justify-center rounded-lg bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 transition-all ${
-                      isLoading || !provider?.wallet?.publicKey
-                        ? "opacity-50 cursor-not-allowed"
-                        : ""
+                      isLoading || !provider?.wallet?.publicKey ? "opacity-50 cursor-not-allowed" : ""
                     }`}
                   >
                     {isLoading ? (
