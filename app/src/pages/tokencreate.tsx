@@ -1,8 +1,5 @@
 import { useAnchorProvider } from "@/components/Solana/solana-provider"
 import { Keypair, PublicKey, Transaction, SystemProgram } from "@solana/web3.js"
-
-
-
 import {
   ChevronRight,
   ChevronLeft,
@@ -13,7 +10,6 @@ import {
   Check,
   CheckIcon,
 } from "lucide-react"
-
 import {
   TOKEN_PROGRAM_ID,
   getAssociatedTokenAddress,
@@ -27,8 +23,7 @@ import {
   keypairIdentity,
   toMetaplexFile,
 } from "@metaplex-foundation/js"
-// import { bundlrStorage } from "@metaplex-foundation/js-plugin-bundlr"
-
+import { useNavigate } from "react-router-dom" // <-- Add this import
 
 const TokenCreate = () => {
   const provider = useAnchorProvider()
@@ -37,6 +32,7 @@ const TokenCreate = () => {
   const [error, setError] = useState<string | null>(null)
   const [shouldCreateToken, setShouldCreateToken] = useState<boolean>(false)
   const [tokenSupply, setTokenSupply] = useState<number>(1000000);
+  const navigate = useNavigate(); // <-- Add this line
 
   const createToken = useCallback(async () => {
     if (
@@ -267,7 +263,6 @@ const TokenCreate = () => {
                 <button
                   onClick={() => {
                     setShouldCreateToken(true)
-
                     createToken()
                   }}
                   disabled={loading}
@@ -329,7 +324,9 @@ const TokenCreate = () => {
                 </div>
               </div>
 
-              <button className="px-8 py-3 rounded-lg bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white font-medium">
+              <button
+                onClick={() => navigate("/")} // <-- Add this handler
+                className="px-8 py-3 rounded-lg bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white font-medium">
                 Go to Creator Dashboard
               </button>
             </div>
