@@ -1,7 +1,18 @@
-import React, { useState } from "react";
-import { ChevronRight, ChevronLeft, Wallet, User, Upload, Zap, Check, CheckIcon } from "lucide-react";
-import Navbar from "@/components/Navbar";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useRef, useEffect } from "react"
+import {
+  ChevronRight,
+  ChevronLeft,
+  Wallet,
+  User,
+  Upload,
+  Zap,
+  Check,
+  CheckIcon,
+  AlertCircle,
+  X,
+} from "lucide-react"
+import Navbar from "@/components/Navbar"
+import { useNavigate } from "react-router-dom"
 
 const CreatorOnboarding = () => {
   const [currentStep, setCurrentStep] = useState(1)
@@ -118,16 +129,58 @@ const CreatorOnboarding = () => {
   )
 }
 
+// Form validation utility functions
+const validateUsername = (username) => {
+  if (!username) return "Username is required";
+  if (username.length < 3) return "Username must be at least 3 characters";
+  if (!/^[a-zA-Z0-9_]+$/.test(username)) return "Username can only contain letters, numbers and underscores";
+  return "";
+};
+
+const validateDisplayName = (name) => {
+  if (!name) return "Display name is required";
+  if (name.length < 2) return "Display name must be at least 2 characters";
+  return "";
+};
+
+const validateBio = (bio) => {
+  if (!bio) return "Bio is required";
+  if (bio.length < 10) return "Bio must be at least 10 characters";
+  if (bio.length > 500) return "Bio must be less than 500 characters";
+  return "";
+};
+
+const validateUrl = (url) => {
+  if (!url) return "";
+  const urlPattern = /^(https?:\/\/)?([\w-]+(\.[\w-]+)+)([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?$/;
+  if (!urlPattern.test(url)) return "Please enter a valid URL";
+  return "";
+};
+
 const WalletConnectStep = ({ onNext }) => {
   const [connecting, setConnecting] = useState(false)
   const [connected, setConnected] = useState(false)
+  const [selectedWallet, setSelectedWallet] = useState(null)
+  const [error, setError] = useState("")
 
-  const handleConnect = () => {
+  const handleConnect = (walletName) => {
+    setSelectedWallet(walletName)
+    setError("")
     setConnecting(true)
 
+    // Simulate wallet connection
     setTimeout(() => {
+      // For demo purposes, let's simulate a connection error with some wallets
+      if (walletName === "WalletConnect") {
+        setError("Connection failed. Please try again or use a different wallet.");
+        setConnecting(false);
+        return;
+      }
+
       setConnecting(false)
       setConnected(true)
+      
+      // Wait a bit before proceeding to the next step
       setTimeout(onNext, 1000)
     }, 1500)
   }
@@ -151,23 +204,34 @@ const WalletConnectStep = ({ onNext }) => {
           </p>
         </div>
 
+        {error && (
+          <div className="mb-6 p-4 border border-red-500/50 bg-red-500/10 rounded-lg flex items-start">
+            <AlertCircle className="h-5 w-5 text-red-500 mr-2 mt-0.5 flex-shrink-0" />
+            <p className="text-red-400 text-sm">{error}</p>
+          </div>
+        )}
+
         <div className="space-y-4">
           {wallets.map((wallet) => (
             <button
               key={wallet.name}
-              onClick={handleConnect}
+              onClick={() => handleConnect(wallet.name)}
               disabled={connecting || connected}
-              className={`w-full flex items-center justify-between p-4 rounded-xl border border-gray-700 hover:border-cyan-500 transition-all ${
-                connecting || connected
+              className={`w-full flex items-center justify-between p-4 rounded-xl border transition-all ${
+                connected && wallet.name === selectedWallet
+                  ? "border-cyan-500 bg-gray-800/60"
+                  : "border-gray-700 hover:border-cyan-500 hover:bg-gray-800"
+              } ${
+                connecting || (connected && wallet.name !== selectedWallet)
                   ? "opacity-50 cursor-not-allowed"
-                  : "hover:bg-gray-800"
+                  : ""
               }`}
             >
               <div className="flex items-center">
                 <span className="text-2xl mr-3">{wallet.icon}</span>
                 <span>{wallet.name}</span>
               </div>
-              {connected && wallet.name === "MetaMask" ? (
+              {connected && wallet.name === selectedWallet ? (
                 <span className="bg-gradient-to-r from-purple-500 to-cyan-500 text-white text-xs px-2 py-1 rounded-full">
                   Connected
                 </span>
@@ -181,7 +245,7 @@ const WalletConnectStep = ({ onNext }) => {
         {connecting && (
           <div className="mt-6 text-center">
             <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-cyan-500 border-r-transparent"></div>
-            <p className="mt-2 text-gray-400">Connecting to wallet...</p>
+            <p className="mt-2 text-gray-400">Connecting to {selectedWallet}...</p>
           </div>
         )}
 
@@ -200,14 +264,93 @@ const WalletConnectStep = ({ onNext }) => {
   )
 }
 
+const InputField = ({ label, name, value, onChange, error, placeholder, icon, type = "text", ...props }) => {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-400 mb-1">
+        {label} {props.required && <span className="text-red-400">*</span>}
+      </label>
+      <div className="relative">
+        {icon && (
+          <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+            {icon}
+          </span>
+        )}
+        <input
+          type={type}
+          name={name}
+          value={value}
+          onChange={onChange}
+          className={`w-full bg-gray-800 border ${
+            error ? "border-red-500" : "border-gray-700"
+          } rounded-lg py-2 px-4 ${icon ? "pl-8" : ""} text-white placeholder-gray-500 focus:ring-cyan-500 focus:border-cyan-500`}
+          placeholder={placeholder}
+          {...props}
+        />
+      </div>
+      {error && (
+        <p className="mt-1 text-sm text-red-500 flex items-center">
+          <AlertCircle className="h-3 w-3 mr-1" />
+          {error}
+        </p>
+      )}
+    </div>
+  );
+};
+
+const TextareaField = ({ label, name, value, onChange, error, placeholder, ...props }) => {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-400 mb-1">
+        {label} {props.required && <span className="text-red-400">*</span>}
+      </label>
+      <textarea
+        name={name}
+        value={value}
+        onChange={onChange}
+        rows={props.rows || 3}
+        className={`w-full bg-gray-800 border ${
+          error ? "border-red-500" : "border-gray-700"
+        } rounded-lg py-2 px-4 text-white placeholder-gray-500 focus:ring-cyan-500 focus:border-cyan-500`}
+        placeholder={placeholder}
+        {...props}
+      ></textarea>
+      {error && (
+        <p className="mt-1 text-sm text-red-500 flex items-center">
+          <AlertCircle className="h-3 w-3 mr-1" />
+          {error}
+        </p>
+      )}
+    </div>
+  );
+};
+
 const ProfileSetupStep = ({ onNext, onBack }) => {
   const [formData, setFormData] = useState({
     username: "",
     displayName: "",
     bio: "",
-    Youtube: "",
-    YoutubeUrl: "",
+    youtube: "",
+    youtubeUrl: "",
   })
+
+  const [errors, setErrors] = useState({
+    username: "",
+    displayName: "",
+    bio: "",
+    youtube: "",
+    youtubeUrl: "",
+  })
+
+  const [touched, setTouched] = useState({
+    username: false,
+    displayName: false,
+    bio: false,
+    youtube: false,
+    youtubeUrl: false,
+  })
+
+  const [formValid, setFormValid] = useState(false)
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -217,8 +360,54 @@ const ProfileSetupStep = ({ onNext, onBack }) => {
     }))
   }
 
+  const handleBlur = (field) => {
+    setTouched(prev => ({ ...prev, [field]: true }))
+  }
+
+  // Validate form fields on change
+  useEffect(() => {
+    const newErrors = {
+      username: touched.username ? validateUsername(formData.username) : "",
+      displayName: touched.displayName ? validateDisplayName(formData.displayName) : "",
+      bio: touched.bio ? validateBio(formData.bio) : "",
+      youtube: "", // Optional field
+      youtubeUrl: touched.youtubeUrl ? validateUrl(formData.youtubeUrl) : "",
+    }
+    
+    setErrors(newErrors)
+    
+    // Check if the form is valid (required fields are filled and no errors)
+    const isValid = !newErrors.username && 
+                    !newErrors.displayName && 
+                    !newErrors.bio && 
+                    !newErrors.youtubeUrl;
+    
+    setFormValid(isValid)
+  }, [formData, touched])
+
+  const validateForm = () => {
+    // Touch all fields to trigger validation
+    setTouched({
+      username: true,
+      displayName: true,
+      bio: true,
+      youtube: true,
+      youtubeUrl: true,
+    })
+    
+    return formValid
+  }
+
   const handleSubmit = () => {
-    onNext()
+    if (validateForm()) {
+      onNext()
+    } else {
+      // Scroll to the first error
+      const firstErrorField = document.querySelector('.text-red-500')
+      if (firstErrorField) {
+        firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
+    }
   }
 
   return (
@@ -244,92 +433,62 @@ const ProfileSetupStep = ({ onNext, onBack }) => {
 
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">
-                  Username
-                </label>
-                <div className="relative">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
-                    @
-                  </span>
-                  <input
-                    type="text"
-                    name="username"
-                    value={formData.username}
-                    onChange={handleChange}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-lg py-2 px-4 pl-8 text-white placeholder-gray-500 focus:ring-cyan-500 focus:border-cyan-500"
-                    placeholder="username"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">
-                  Display Name
-                </label>
-                <input
-                  type="text"
-                  name="displayName"
-                  value={formData.displayName}
-                  onChange={handleChange}
-                  className="w-full bg-gray-800 border border-gray-700 rounded-lg py-2 px-4 text-white placeholder-gray-500 focus:ring-cyan-500 focus:border-cyan-500"
-                  placeholder="Your Name"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-400 mb-1">
-                Bio
-              </label>
-              <textarea
-                name="bio"
-                value={formData.bio}
+              <InputField
+                label="Username"
+                name="username"
+                value={formData.username}
                 onChange={handleChange}
-                rows={3}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg py-2 px-4 text-white placeholder-gray-500 focus:ring-cyan-500 focus:border-cyan-500"
-                placeholder="Tell your audience about yourself..."
-              ></textarea>
+                onBlur={() => handleBlur('username')}
+                error={errors.username}
+                placeholder="username"
+                icon="@"
+                required
+              />
+
+              <InputField
+                label="Display Name"
+                name="displayName"
+                value={formData.displayName}
+                onChange={handleChange}
+                onBlur={() => handleBlur('displayName')}
+                error={errors.displayName}
+                placeholder="Your Name"
+                required
+              />
             </div>
+
+            <TextareaField
+              label="Bio"
+              name="bio"
+              value={formData.bio}
+              onChange={handleChange}
+              onBlur={() => handleBlur('bio')}
+              error={errors.bio}
+              placeholder="Tell your audience about yourself..."
+              required
+            />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">
-                  Youtube
-                </label>
-                <div className="relative">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
-                    @
-                  </span>
-                  <input
-                    type="text"
-                    name="Youtube"
-                    value={formData.Youtube}
-                    onChange={handleChange}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-lg py-2 px-4 pl-8 text-white placeholder-gray-500 focus:ring-cyan-500 focus:border-cyan-500"
-                    placeholder="Enter Your Name"
-                  />
-                </div>
-              </div>
+              <InputField
+                label="Youtube Username"
+                name="youtube"
+                value={formData.youtube}
+                onChange={handleChange}
+                onBlur={() => handleBlur('youtube')}
+                error={errors.youtube}
+                placeholder="Your YouTube username"
+                icon="@"
+              />
 
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">
-                  Instagram
-                </label>
-                <div className="relative">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
-                    @
-                  </span>
-                  <input
-                    type="text"
-                    name="YoutubeUrl"
-                    value={formData.YoutubeUrl}
-                    onChange={handleChange}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-lg py-2 px-4 pl-8 text-white placeholder-gray-500 focus:ring-cyan-500 focus:border-cyan-500"
-                    placeholder="Enter Your Youtube Url"
-                  />
-                </div>
-              </div>
+              <InputField
+                label="Youtube URL"
+                name="youtubeUrl"
+                value={formData.youtubeUrl}
+                onChange={handleChange}
+                onBlur={() => handleBlur('youtubeUrl')}
+                error={errors.youtubeUrl}
+                placeholder="https://youtube.com/c/yourhandle"
+              />
             </div>
           </div>
 
@@ -346,7 +505,9 @@ const ProfileSetupStep = ({ onNext, onBack }) => {
             <button
               type="button"
               onClick={handleSubmit}
-              className="flex items-center px-8 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white font-medium"
+              className={`flex items-center px-8 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-cyan-500 ${
+                !formValid && 'opacity-70 cursor-not-allowed hover:from-purple-500 hover:to-cyan-500'
+              } hover:from-purple-600 hover:to-cyan-600 text-white font-medium`}
             >
               Continue
               <ChevronRight className="h-5 w-5 ml-2" />
@@ -360,67 +521,285 @@ const ProfileSetupStep = ({ onNext, onBack }) => {
 
 // Step 3: Content Upload
 const ContentUploadStep = ({ onNext, onBack }) => {
+  const [selectedFiles, setSelectedFiles] = useState([])
+  const [contentDetails, setContentDetails] = useState({
+    title: "",
+    description: "",
+    tags: ""
+  })
+  const [errors, setErrors] = useState({
+    files: "",
+    title: "",
+    description: ""
+  })
+  const [touched, setTouched] = useState({
+    title: false,
+    description: false,
+    tags: false
+  })
+  const [formValid, setFormValid] = useState(false)
+  const fileInputRef = useRef(null)
+
+  const validateContentDetails = () => {
+    const newErrors = {}
+    
+    if (!selectedFiles.length) {
+      newErrors.files = "Please select at least one file"
+    } else {
+      // Check file sizes
+      const invalidFiles = selectedFiles.filter(file => file.size > 100 * 1024 * 1024) // 100MB
+      if (invalidFiles.length) {
+        newErrors.files = `${invalidFiles.length} file(s) exceed the 100MB limit`
+      }
+    }
+    
+    if (!contentDetails.title && touched.title) {
+      newErrors.title = "Title is required"
+    } else if (contentDetails.title.length > 100 && touched.title) {
+      newErrors.title = "Title must be less than 100 characters"
+    }
+    
+    if (!contentDetails.description && touched.description) {
+      newErrors.description = "Description is required"
+    }
+    
+    return newErrors
+  }
+
+  useEffect(() => {
+    const newErrors = validateContentDetails()
+    setErrors(newErrors)
+    
+    // Form is valid if there are no errors and at least one file is selected
+    const isValid = !Object.values(newErrors).some(error => error) && selectedFiles.length > 0
+    setFormValid(isValid)
+  }, [selectedFiles, contentDetails, touched])
+
+  const handleFileInputClick = () => {
+    fileInputRef.current.click()
+  }
+
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files)
+    setSelectedFiles(files)
+    setTouched(prev => ({ ...prev, files: true }))
+  }
+
+  const handleRemoveFile = (index) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index))
+  }
+
+  const handleDragOver = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+  const handleDrop = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    const files = Array.from(e.dataTransfer.files)
+    setSelectedFiles(files)
+    setTouched(prev => ({ ...prev, files: true }))
+  }
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target
+    setContentDetails(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  const handleBlur = (field) => {
+    setTouched(prev => ({ ...prev, [field]: true }))
+  }
+
+  const handleSubmit = () => {
+    // Touch all fields to trigger validation
+    setTouched({
+      title: true,
+      description: true,
+      tags: true,
+      files: true
+    })
+    
+    const newErrors = validateContentDetails()
+    setErrors(newErrors)
+    
+    if (!Object.values(newErrors).some(error => error) && selectedFiles.length > 0) {
+      onNext()
+    }
+  }
+
   return (
     <div className="max-w-2xl mx-auto">
       <div className="bg-gray-900 rounded-2xl p-8 border border-gray-800 shadow-xl">
         <h2 className="text-3xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">
           Upload Your Content
         </h2>
-        
+
         <div className="mb-8">
-          <div className="border-2 border-dashed border-gray-700 rounded-xl p-8 text-center hover:border-cyan-500 transition-colors cursor-pointer">
-            <Upload className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-            <h3 className="text-lg font-medium mb-2">Drag and drop files here</h3>
-            <p className="text-gray-400 mb-4">Or click to browse your files</p>
-            <p className="text-gray-500 text-sm">
-              Supported formats: JPG, PNG, GIF, MP4, MP3 (Max 100MB)
-            </p>
-            
-            <button className="mt-6 px-6 py-2 bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 rounded-lg text-white font-medium">
-              Choose Files
-            </button>
+          <div
+            className={`border-2 border-dashed ${
+              errors.files 
+                ? "border-red-500" 
+                : selectedFiles.length > 0 
+                  ? "border-cyan-500" 
+                  : "border-gray-700"
+            } rounded-xl p-8 text-center hover:border-cyan-500 transition-colors cursor-pointer`}
+            onClick={handleFileInputClick}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              onChange={handleFileChange}
+              multiple
+              accept=".jpg,.jpeg,.png,.gif,.mp4,.mp3"
+              className="hidden"
+            />
+
+            {selectedFiles.length === 0 ? (
+              <>
+                <Upload className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                <h3 className="text-lg font-medium mb-2">
+                  Drag and drop files here
+                </h3>
+                <p className="text-gray-400 mb-4">
+                  Or click to browse your files
+                </p>
+                <p className="text-gray-500 text-sm">
+                  Supported formats: JPG, PNG, GIF, MP4, MP3 (Max 100MB)
+                </p>
+
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    fileInputRef.current.click()
+                  }}
+                  className="mt-6 px-6 py-2 bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 rounded-lg text-white font-medium"
+                >
+                  Choose Files
+                </button>
+              </>
+            ) : (
+              <div className="py-4">
+                <div className="flex items-center justify-center mb-4">
+                  <div className="bg-cyan-500 rounded-full p-2">
+                    <Check className="h-6 w-6 text-white" />
+                  </div>
+                </div>
+                <h3 className="text-lg font-medium mb-2">
+                  {selectedFiles.length} {selectedFiles.length === 1 ? "File" : "Files"} Selected
+                </h3>
+                <ul className="max-h-40 overflow-y-auto mb-4 px-4">
+                  {selectedFiles.map((file, index) => (
+                    <li
+                      key={index}
+                      className="flex items-center justify-between py-2 border-b border-gray-700 last:border-0"
+                    >
+                      <div className="flex items-center">
+                        <div className="w-8 h-8 bg-gray-700 rounded flex items-center justify-center mr-3">
+                          {file.type.startsWith("image/")
+                            ? "🖼️"
+                            : file.type.startsWith("video/")
+                            ? "🎬"
+                            : file.type.startsWith("audio/")
+                            ? "🎵"
+                            : "📄"}
+                        </div>
+                        <span className="text-sm text-gray-300 truncate max-w-xs">
+                          {file.name}
+                        </span>
+                      </div>
+                      <div className="flex items-center">
+                        <span className="text-xs text-gray-400 mr-2">
+                          {(file.size / (1024 * 1024)).toFixed(2)} MB
+                        </span>
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveFile(index);
+                          }}
+                          className="p-1 hover:bg-gray-700 rounded-full"
+                        >
+                          <X className="h-4 w-4 text-gray-400 hover:text-red-400" />
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    fileInputRef.current.click()
+                  }}
+                  className="px-6 py-2 bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 rounded-lg text-white font-medium"
+                >
+                  Choose {selectedFiles.length > 0 ? "More" : ""} Files
+                </button>
+              </div>
+            )}
           </div>
+          
+          {errors.files && (
+            <p className="mt-2 text-sm text-red-500 flex items-center">
+              <AlertCircle className="h-3 w-3 mr-1" />
+              {errors.files}
+            </p>
+          )}
         </div>
-        
+
         <div className="mb-8">
           <h3 className="text-lg font-medium mb-4">Content Details</h3>
           <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-400 mb-1">Title</label>
-              <input
-                type="text"
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg py-2 px-4 text-white placeholder-gray-500 focus:ring-cyan-500 focus:border-cyan-500"
-                placeholder="Give your content a title"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-400 mb-1">Description</label>
-              <textarea
-                rows={3}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg py-2 px-4 text-white placeholder-gray-500 focus:ring-cyan-500 focus:border-cyan-500"
-                placeholder="Describe your content..."
-              ></textarea>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-400 mb-1">Tags</label>
-              <input
-                type="text"
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg py-2 px-4 text-white placeholder-gray-500 focus:ring-cyan-500 focus:border-cyan-500"
-                placeholder="Add tags separated by commas"
-              />
-            </div>
+            <InputField
+              label="Title"
+              name="title"
+              value={contentDetails.title}
+              onChange={handleInputChange}
+              onBlur={() => handleBlur('title')}
+              error={errors.title}
+              placeholder="Give your content a title"
+              required
+            />
+            
+            <TextareaField
+              label="Description"
+              name="description"
+              value={contentDetails.description}
+              onChange={handleInputChange}
+              onBlur={() => handleBlur('description')}
+              error={errors.description}
+              placeholder="Describe your content..."
+              required
+            />
+            
+            <InputField
+              label="Tags"
+              name="tags"
+              value={contentDetails.tags}
+              onChange={handleInputChange}
+              onBlur={() => handleBlur('tags')}
+              placeholder="Add tags separated by commas"
+            />
           </div>
         </div>
-        
+
         <div className="p-4 rounded-lg bg-gradient-to-r from-purple-900/30 to-cyan-900/30 border border-gray-700 mb-8">
           <div className="flex items-start">
             <div className="mr-4 mt-1">
               <Zap className="h-6 w-6 text-cyan-400" />
             </div>
             <div>
-              <h4 className="font-medium text-white mb-1">Monetize your content through your own token</h4>
+              <h4 className="font-medium text-white mb-1">
+                Monetize your content through your own token
+              </h4>
               <p className="text-sm text-gray-300">
-                After completing your profile setup, you'll launch your creator token so fans can invest in your success.
+                After completing your profile setup, you'll launch your creator
+                token so fans can invest in your success.
               </p>
             </div>
           </div>
@@ -434,7 +813,7 @@ const ContentUploadStep = ({ onNext, onBack }) => {
             <ChevronLeft className="h-5 w-5 mr-2" />
             Back
           </button>
-          
+
           <button
             onClick={onNext}
             className="flex items-center px-8 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white font-medium"
@@ -445,24 +824,24 @@ const ContentUploadStep = ({ onNext, onBack }) => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
 // Step 4: Finalize Profile
 const FinalizeProfileStep = ({ onBack }) => {
-  const [profileComplete, setProfileComplete] = useState(false);
-  const [redirectToCreate, setRedirectToCreate] = useState(false);
-  const navigate = useNavigate();
-  
+  const [profileComplete, setProfileComplete] = useState(false)
+  const [redirectToCreate, setRedirectToCreate] = useState(false)
+  const navigate = useNavigate()
+
   const handleFinalize = () => {
-    setProfileComplete(true);
-  };
+    setProfileComplete(true)
+  }
 
   const handleCreateToken = () => {
     // Navigate to token creation page
-    navigate("/create");
-    console.log("Navigating to token creation page");
-  };
+    navigate("/create")
+    console.log("Navigating to token creation page")
+  }
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -470,7 +849,7 @@ const FinalizeProfileStep = ({ onBack }) => {
         <h2 className="text-3xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">
           Complete Your Creator Profile
         </h2>
-        
+
         {!profileComplete ? (
           <>
             <div className="mb-8">
@@ -479,11 +858,13 @@ const FinalizeProfileStep = ({ onBack }) => {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-gray-400">Creator name:</span>
-                    <span className="text-white font-medium">Alex Thompson</span>
+                    <span className="text-white font-medium">
+                      Akanshya thapa
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-gray-400">Username:</span>
-                    <span className="text-white font-medium">@alexcreates</span>
+                    <span className="text-white font-medium">@akanshya</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-gray-400">Content uploads:</span>
@@ -491,7 +872,7 @@ const FinalizeProfileStep = ({ onBack }) => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="p-6 rounded-xl bg-gray-800 border border-gray-700">
                 <h3 className="text-lg font-medium mb-4">Creator Benefits</h3>
                 <ul className="space-y-3">
@@ -499,30 +880,38 @@ const FinalizeProfileStep = ({ onBack }) => {
                     <div className="bg-gradient-to-r from-purple-500 to-cyan-500 rounded-full p-1 mr-3 mt-1">
                       <Check className="h-4 w-4 text-white" />
                     </div>
-                    <span className="text-gray-300">Launch your own creator token on Solana</span>
+                    <span className="text-gray-300">
+                      Launch your own creator token on Solana
+                    </span>
                   </li>
                   <li className="flex items-start">
                     <div className="bg-gradient-to-r from-purple-500 to-cyan-500 rounded-full p-1 mr-3 mt-1">
                       <Check className="h-4 w-4 text-white" />
                     </div>
-                    <span className="text-gray-300">Attract investment from fans who believe in your content</span>
+                    <span className="text-gray-300">
+                      Attract investment from fans who believe in your content
+                    </span>
                   </li>
                   <li className="flex items-start">
                     <div className="bg-gradient-to-r from-purple-500 to-cyan-500 rounded-full p-1 mr-3 mt-1">
                       <Check className="h-4 w-4 text-white" />
                     </div>
-                    <span className="text-gray-300">Grow your community through token-based incentives</span>
+                    <span className="text-gray-300">
+                      Grow your community through token-based incentives
+                    </span>
                   </li>
                   <li className="flex items-start">
                     <div className="bg-gradient-to-r from-purple-500 to-cyan-500 rounded-full p-1 mr-3 mt-1">
                       <Check className="h-4 w-4 text-white" />
                     </div>
-                    <span className="text-gray-300">Enable subscribers to invest directly in your success</span>
+                    <span className="text-gray-300">
+                      Enable subscribers to invest directly in your success
+                    </span>
                   </li>
                 </ul>
               </div>
             </div>
-            
+
             <div className="mt-8 flex justify-between">
               <button
                 onClick={onBack}
@@ -531,7 +920,7 @@ const FinalizeProfileStep = ({ onBack }) => {
                 <ChevronLeft className="h-5 w-5 mr-2" />
                 Back
               </button>
-              
+
               <button
                 onClick={handleFinalize}
                 className="flex items-center px-8 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white font-medium"
@@ -546,26 +935,30 @@ const FinalizeProfileStep = ({ onBack }) => {
             <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-r from-purple-500 to-cyan-500 mb-6">
               <Check className="h-12 w-12 text-white" />
             </div>
-            
+
             <h3 className="text-2xl font-bold mb-4">Congratulations!</h3>
             <p className="text-gray-400 mb-8">
               Your creator profile has been successfully set up.
-              <br />You're now ready to launch your token and attract investors!
+              <br />
+              You're now ready to launch your token and attract investors!
             </p>
-            
+
             <div className="p-6 rounded-xl bg-gradient-to-r from-purple-900/40 to-cyan-900/40 border border-gray-700 mb-8">
               <div className="flex items-center justify-center mb-4">
                 <div className="bg-gray-800 p-3 rounded-lg">
                   <Zap className="h-8 w-8 text-cyan-400" />
                 </div>
               </div>
-              
-              <h4 className="text-lg font-medium mb-2 text-center">Ready to launch your Creator Token?</h4>
+
+              <h4 className="text-lg font-medium mb-2 text-center">
+                Ready to launch your Creator Token?
+              </h4>
               <p className="text-gray-400 text-center mb-4">
-                Create your own token on Solana and let fans invest in your growth story.
+                Create your own token on Solana and let fans invest in your
+                growth story.
               </p>
-              
-              <button 
+
+              <button
                 onClick={handleCreateToken}
                 className="w-full py-3 rounded-lg bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white font-medium flex items-center justify-center"
               >
@@ -573,17 +966,15 @@ const FinalizeProfileStep = ({ onBack }) => {
                 <Zap className="h-5 w-5 ml-2" />
               </button>
             </div>
-            
-            <button 
-              className="px-8 py-3 rounded-lg border border-gray-600 hover:border-gray-500 text-gray-300 hover:text-white font-medium transition-colors"
-            >
+
+            <button className="px-8 py-3 rounded-lg border border-gray-600 hover:border-gray-500 text-gray-300 hover:text-white font-medium transition-colors">
               Go to Creator Dashboard
             </button>
           </div>
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default CreatorOnboarding;
+export default CreatorOnboarding
